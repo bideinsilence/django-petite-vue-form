@@ -1,1 +1,1 @@
-echo # django-petite-vue-form
+# django-petite-vue-form
