@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Testing Petite-Vue Multi-Step Form</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1/dist/tailwind.min.css"
+      rel="stylesheet"
+      type="text/css"
+    >
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@1.10.0/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    >
+    <style type="text/css">
+      [v-cloak] {
+        display: none;
+      }
+    </style>
+    {% load static %}
+
+    <script type="module" src="{% static 'petite_vue_app/app.js' %}"></script>
+  </head>
+  <body>
+
+    {% verbatim %}
+      <div id="multi-step-form" v-cloak v-scope>
+        <form class="p-10" @submit.prevent="">
+          <!-- Step Indicators -->
+          <div
+            v-scope="StepsIndicatorComponent({ stepsCount: totalSteps })"
+          ></div>
+
+          <div v-if="!submitted">
+            <div v-for="(fieldKeys, step) in steps">
+              <div v-if="currentStep === step">
+                <div
+                  v-for="(field, index) in fieldKeys"
+                  v-scope="FieldComponent({
+                    field: fields[field],
+                    isInvalid:()=> !!invalids[field],
+                    invalidMessage: () => invalids[field],
+                    validate: ()=> validateField(field)
+                  })"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Form footer (buttons) -->
+            <footer class="flex flex-row-reverse gap-2 justify-start mt-5">
+              <button
+                class="btn btn-primary"
+                @click.prevent="submit"
+                v-if="isLastStep"
+              >
+                Submit
+              </button>
+              <button
+                class="btn btn-primary"
+                @click="nextStep"
+                v-if="!isLastStep"
+              >
+                Next
+              </button>
+              <button
+                class="btn"
+                @click.prevent="previousStep"
+                v-if="!isFirstStep"
+              >
+                Previous
+              </button>
+            <footer>
+          </div>
+
+          <!-- Success Page -->
+          <div v-else>
+            <h3 class="p-5 text-lg">
+              Hey {{ fields.name.value  }}, thanks for donating!
+            </h3>
+          </div>
+
+        </form>
+      </div>
+
+
+      <!-- Steps Indicator Component Template -->
+      <template id="step-indicator-component-template">
+      <!-- Step Indicators -->
+        <div class="flex items-stretch gap-2">
+          <div
+            v-for="step in stepsCountWithSuccessPage"
+            class="h-2 w-full rounded text-purple-500"
+            style="border: 1px solid;"
+            :class="{'bg-purple-500 ': step - 1 <= currentStep || submitted}"
+          ></div>
+        </div>
+      </template>
+
+      <!-- Field Component Template -->
+      <template id="field-component-template">
+        <!-- Form Field -->
+        <div class="relative">
+          <div class="form-control">
+            <label class="label">
+              {{ field.label }}
+              <input
+                class="input input-bordered m-2 w-full"
+                type="text"
+                v-model="field.value"
+              >
+            </label>
+          </div>
+          <div
+            v-if="isInvalid"
+            class="text-error text-right text-sm pr-5 absolute right-0"
+            style="bottom: -7px;"
+          >
+            {{ invalidMessage }}
+          </div>
+        </div>
+      </template>
+    {% endverbatim %}
+
+  </body>
+</html>
